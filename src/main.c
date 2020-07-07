@@ -20,6 +20,10 @@
 #include "util.h"
 #include "world.h"
 
+#include <mruby.h>
+#include <mruby/compile.h>
+#include <mruby/string.h>
+
 #define MAX_CHUNKS 8192
 #define MAX_PLAYERS 128
 #define WORKERS 4
@@ -2122,6 +2126,10 @@ void parse_command(const char *buffer, int forward) {
     }
     else if (sscanf(buffer, "/cylinder %d", &radius) == 1) {
         cylinder(&g->block0, &g->block1, radius, 0);
+    }
+    else if (sscanf(buffer, "/mruby") == 0) {
+        mrb_state* mrb = mrb_open();
+        mrb_value ret = mrb_load_string(mrb, "p \"Hello, mruby 2 ** 4 = #{2 ** 4}\"");
     }
     else if (forward) {
         client_talk(buffer);
