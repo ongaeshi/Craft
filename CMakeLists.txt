@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(craft)
 
-FILE(GLOB SOURCE_FILES src/*.c)
+FILE(GLOB SOURCE_FILES src/*.c src/mruby/src/*.c)
+
+include_directories(src/mruby/include)
 
 add_executable(
     craft
