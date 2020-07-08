@@ -2129,10 +2129,24 @@ void parse_command(const char *buffer, int forward) {
         cylinder(&g->block0, &g->block1, radius, 0);
     }
     else if (sscanf(buffer, "/mruby") == 0) {
+        mrb_state *mrb = g->mrb;
         const char* s = &buffer[7]; // "/mruby "
         mrb_value ret = mrb_load_string(g->mrb, s);
 
+		if (mrb->exc) {
+			mrb_value exception = mrb_obj_value(mrb->exc);
+			mrb_p(mrb, exception);
+
+            // Can't rescue exception?
+            mruby_init();
+		}
+    }
+    else if (sscanf(buffer, "/load") == 0) {
         mrb_state *mrb = g->mrb;
+        const char* fileName = &buffer[6]; // "/load "
+        printf("load %s\n", fileName);
+        FILE* fp = fopen(fileName, "r");
+        mrb_load_file(mrb, fp);
 
 		if (mrb->exc) {
 			mrb_value exception = mrb_obj_value(mrb->exc);
