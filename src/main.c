@@ -2131,6 +2131,16 @@ void parse_command(const char *buffer, int forward) {
     else if (sscanf(buffer, "/mruby") == 0) {
         const char* s = &buffer[7]; // "/mruby "
         mrb_value ret = mrb_load_string(g->mrb, s);
+
+        mrb_state *mrb = g->mrb;
+
+		if (mrb->exc) {
+			mrb_value exception = mrb_obj_value(mrb->exc);
+			mrb_p(mrb, exception);
+
+            // Can't rescue exception?
+            mruby_init();
+		}
     }
     else if (forward) {
         client_talk(buffer);
@@ -2592,8 +2602,23 @@ void reset_model() {
     g->time_changed = 1;
 }
 
+static mrb_value mrb_kernel_set_block(mrb_state *mrb, mrb_value self) {
+    mrb_int x, y, z, w;
+	mrb_get_args(mrb, "iiii", &x, &y, &z, &w);
+
+    set_block(x, y, z, w);
+
+    return self;
+}
+
+void mruby_add_method(mrb_state *mrb) {
+    struct RClass *krn = mrb->kernel_module;
+    mrb_define_method(mrb, krn, "set_block", mrb_kernel_set_block, MRB_ARGS_REQ(4));
+}
+
 void mruby_init() {
     g->mrb = mrb_open();
+    mruby_add_method(g->mrb);
 }
 
 void mruby_close() {
