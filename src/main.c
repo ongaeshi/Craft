@@ -155,6 +155,7 @@ typedef struct {
     Block block1;
     Block copy0;
     Block copy1;
+    mrb_state* mrb;
 } Model;
 
 static Model model;
@@ -2128,10 +2129,8 @@ void parse_command(const char *buffer, int forward) {
         cylinder(&g->block0, &g->block1, radius, 0);
     }
     else if (sscanf(buffer, "/mruby") == 0) {
-        mrb_state* mrb = mrb_open();
         const char* s = &buffer[7]; // "/mruby "
-        mrb_value ret = mrb_load_string(mrb, s);
-        mrb_close(mrb);
+        mrb_value ret = mrb_load_string(g->mrb, s);
     }
     else if (forward) {
         client_talk(buffer);
@@ -2593,6 +2592,15 @@ void reset_model() {
     g->time_changed = 1;
 }
 
+void mruby_init() {
+    g->mrb = mrb_open();
+}
+
+void mruby_close() {
+    mrb_close(g->mrb);
+    g->mrb = NULL;
+}
+
 int main(int argc, char **argv) {
     // INITIALIZATION //
     // curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -2625,6 +2633,8 @@ int main(int argc, char **argv) {
     glEnable(GL_DEPTH_TEST);
     glLogicOp(GL_INVERT);
     glClearColor(0, 0, 0, 1);
+
+    mruby_init();    
 
     // LOAD TEXTURES //
     GLuint texture;
@@ -2965,6 +2975,7 @@ int main(int argc, char **argv) {
         del_buffer(sky_buffer);
         delete_all_chunks();
         delete_all_players();
+        mruby_close();
     }
 
     glfwTerminate();
