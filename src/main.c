@@ -2128,7 +2128,7 @@ void parse_command(const char *buffer, int forward) {
     else if (sscanf(buffer, "/cylinder %d", &radius) == 1) {
         cylinder(&g->block0, &g->block1, radius, 0);
     }
-    else if (sscanf(buffer, "/mruby") == 0) {
+    else if (strncmp(buffer, "/mruby", 6) == 0) {
         mrb_state *mrb = g->mrb;
         const char* s = &buffer[7]; // "/mruby "
         mrb_value ret = mrb_load_string(g->mrb, s);
@@ -2141,7 +2141,7 @@ void parse_command(const char *buffer, int forward) {
             mruby_init();
 		}
     }
-    else if (sscanf(buffer, "/load") == 0) {
+    else if (strncmp(buffer, "/load", 5) == 0) {
         mrb_state *mrb = g->mrb;
         const char* fileName = &buffer[6]; // "/load "
         printf("load %s\n", fileName);
