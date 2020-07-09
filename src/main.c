@@ -2144,7 +2144,7 @@ void parse_command(const char *buffer, int forward) {
     else if (strncmp(buffer, "/load", 5) == 0) {
         mrb_state *mrb = g->mrb;
         const char* fileName = &buffer[6]; // "/load "
-        printf("load %s\n", fileName);
+        // printf("load %s\n", fileName);
         FILE* fp = fopen(fileName, "r");
         mrb_load_file(mrb, fp);
 
@@ -2625,14 +2625,20 @@ static mrb_value mrb_kernel_set_block(mrb_state *mrb, mrb_value self) {
     return self;
 }
 
-void mruby_add_method(mrb_state *mrb) {
+void mruby_add_methods(mrb_state *mrb) {
     struct RClass *krn = mrb->kernel_module;
     mrb_define_method(mrb, krn, "set_block", mrb_kernel_set_block, MRB_ARGS_REQ(4));
 }
 
+void mruby_load_lib(mrb_state *mrb) {
+    FILE* fp = fopen("lib/craft.rb", "r");
+    mrb_load_file(mrb, fp);
+}
+
 void mruby_init() {
     g->mrb = mrb_open();
-    mruby_add_method(g->mrb);
+    mruby_add_methods(g->mrb);
+    mruby_load_lib(g->mrb);
 }
 
 void mruby_close() {
