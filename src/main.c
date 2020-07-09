@@ -2441,6 +2441,10 @@ void handle_mouse_input() {
     }
 }
 
+void mruby_proc(mrb_state* mrb, double dt) {
+    mrb_funcall(mrb, mrb_obj_value(mrb->kernel_module), "run", 0);
+}
+
 void handle_movement(double dt) {
     static float dy = 0;
     State *s = &g->players->state;
@@ -2633,6 +2637,11 @@ void mruby_add_methods(mrb_state *mrb) {
 void mruby_load_lib(mrb_state *mrb) {
     FILE* fp = fopen("lib/craft.rb", "r");
     mrb_load_file(mrb, fp);
+
+    if (mrb->exc) {
+        mrb_value exception = mrb_obj_value(mrb->exc);
+        mrb_p(mrb, exception);
+    }
 }
 
 void mruby_init() {
@@ -2863,6 +2872,8 @@ int main(int argc, char **argv) {
 
             // HANDLE MOVEMENT //
             handle_movement(dt);
+
+            mruby_proc(g->mrb, dt);
 
             // HANDLE DATA FROM SERVER //
             char *buffer = client_recv();
